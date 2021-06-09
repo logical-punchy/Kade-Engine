@@ -120,6 +120,8 @@ class PlayState extends MusicBeatState
 	public static var strumLineNotes:FlxTypedGroup<FlxSprite> = null;
 	public static var playerStrums:FlxTypedGroup<FlxSprite> = null;
 	public static var cpuStrums:FlxTypedGroup<FlxSprite> = null;
+	
+	public var grpNoteSplashes:FlxTypedGroup<NoteSplash>;
 
 	private var camZooming:Bool = false;
 	private var curSong:String = "";
@@ -293,6 +295,11 @@ class PlayState extends MusicBeatState
 		camHUD = new FlxCamera();
 		camHUD.bgColor.alpha = 0;
 
+		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
+		var noteSplash0:NoteSplash = new NoteSplash();
+		noteSplash0.setupNoteSplash(100, 100, 0);
+		grpNoteSplashes.add(noteSplash0);		
+		
 		FlxG.cameras.reset(camGame);
 		FlxG.cameras.add(camHUD);
 
@@ -853,6 +860,8 @@ class PlayState extends MusicBeatState
 
 		strumLineNotes = new FlxTypedGroup<FlxSprite>();
 		add(strumLineNotes);
+				
+		add(grpNoteSplashes);
 
 		playerStrums = new FlxTypedGroup<FlxSprite>();
 		cpuStrums = new FlxTypedGroup<FlxSprite>();
@@ -971,6 +980,7 @@ class PlayState extends MusicBeatState
 		add(iconP2);
 
 		strumLineNotes.cameras = [camHUD];
+		grpNoteSplashes.cameras = [camHUD];
 		notes.cameras = [camHUD];
 		healthBar.cameras = [camHUD];
 		healthBarBG.cameras = [camHUD];
@@ -2596,6 +2606,36 @@ class PlayState extends MusicBeatState
 					if (FlxG.save.data.accuracyMod == 0)
 						totalNotesHit += 1;
 					sicks++;
+			}
+			
+			var splashIsOn:Bool = true;
+
+			if (noteDiff > Conductor.safeZoneOffset * 0.9)
+			{
+				daRating = 'shit';
+				score = 50;
+				splashIsOn = false;
+			}
+			else if (noteDiff > Conductor.safeZoneOffset * 0.75)
+			{
+				daRating = 'bad';
+				score = 100;
+				splashIsOn = false;
+			}
+			else if (noteDiff > Conductor.safeZoneOffset * 0.2)
+			{
+				daRating = 'good';
+				score = 200;
+				splashIsOn = false;
+			}
+
+
+
+			if(splashIsOn == true)
+			{
+				var a:NoteSplash = grpNoteSplashes.recycle(NoteSplash);
+				a.setupNoteSplash(note.x, note.y, note.noteData);
+				grpNoteSplashes.add(a);
 			}
 
 			// trace('Wife accuracy loss: ' + wife + ' | Rating: ' + daRating + ' | Score: ' + score + ' | Weight: ' + (1 - wife));
